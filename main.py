@@ -5,6 +5,22 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+import results
+from datetime import datetime
+import os
+
+
+def save_training_results(losses, dir_results):
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    os.makedirs(dir_results, exist_ok=True)
+    results_path = os.path.join(dir_results, f"training_results_{timestamp}.txt")
+
+    with open(results_path, "w") as f:
+        f.write("Training Losses:\n")
+        for i, loss in enumerate(losses):
+            f.write(f"Iteration {i + 1}: Loss = {loss:.4f}\n")
+
+    print(f"Training results saved to {results_path}")
 
 
 def main():
@@ -61,6 +77,11 @@ def main():
     plt.ylabel('Loss')
     plt.title('Cross Entropy Loss')
     plt.show()
+
+    # Save model to Results folder
+    results_dir = results.save_model_results(model)
+    # Save training results
+    save_training_results(losses, results_dir)
 
 
 if __name__ == '__main__':

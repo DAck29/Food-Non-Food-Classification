@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from typing import Tuple
 from tqdm import tqdm
 
-def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = "Dataset/food_data") -> Tuple[
+def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = "../Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
 
     if augmented:
