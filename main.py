@@ -1,3 +1,5 @@
+import random
+
 from data_loader import get_dataloader
 from resnet_model import get_resnet50_model
 from tqdm import tqdm
@@ -8,7 +10,17 @@ import matplotlib.pyplot as plt
 import results
 from datetime import datetime
 import os
+import numpy as np
 
+# Set random seed for reproducibility
+seed = 42
+random.seed(seed)  # Built-in Python random seed
+np.random.seed(seed)  # Numpy random seed
+torch.manual_seed(seed)  # PyTorch random seed
+
+# Set seed for CUDA operations, if GPU is available
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(seed)
 
 def save_training_results(losses, dir_results):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
