@@ -53,10 +53,10 @@ def main():
     print(model)
 
     # Calculate class weights
-    train_labels = train_loader.dataset.targets  # Assuming your dataset has a 'targets' attribute
+    train_labels = train_loader.dataset.targets  
     classes = np.unique(train_labels)  # Get unique class labels
-    class_weights = compute_class_weight('balanced', classes=classes, y=train_labels) # why balanced?
-    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU if necessary
+    class_weights = compute_class_weight('balanced', classes=classes, y=train_labels) 
+    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU 
 
 
     # Define training parameters
