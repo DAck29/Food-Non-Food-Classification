@@ -2,7 +2,7 @@ import os
 import torchvision
 from torch.utils.data import DataLoader
 from typing import Tuple
-from tqdm import tqdm
+
 
 def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
