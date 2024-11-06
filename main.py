@@ -1,5 +1,7 @@
 import random
 
+from sklearn.utils import compute_class_weight
+
 from data_loader import get_dataloader
 from resnet_model import get_resnet50_model
 from tqdm import tqdm
@@ -50,10 +52,17 @@ def main():
     # Print model summary
     print(model)
 
+    # Calculate class weights
+    train_labels = train_loader.dataset.targets  # Assuming your dataset has a 'targets' attribute
+    classes = np.unique(train_labels)  # Get unique class labels
+    class_weights = compute_class_weight('balanced', classes=classes, y=train_labels) # why balanced?
+    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU if necessary
+
+
     # Define training parameters
     num_epochs = 5
     losses = []
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     # Training loop
