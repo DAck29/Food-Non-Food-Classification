@@ -39,7 +39,7 @@ def save_training_results(losses, dir_results):
 
 def main():
     # Initialize DataLoader
-    train_loader, val_loader, eval_loader = get_dataloader(batch_size=32, augmented=True)
+    train_loader, val_loader, eval_loader = get_dataloader(batch_size=32)
 
     # Set the number of classes based on your dataset
     num_classes = len(train_loader.dataset.classes)  # Automatically set based on dataset

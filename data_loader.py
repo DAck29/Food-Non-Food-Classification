@@ -4,11 +4,10 @@ from torch.utils.data import DataLoader
 from typing import Tuple
 from tqdm import tqdm
 
-def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = "../Dataset/food_data") -> Tuple[
+def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
 
-    if augmented:
-        transform = torchvision.transforms.Compose([
+    transform_augmented = torchvision.transforms.Compose([
             torchvision.transforms.Resize(256),  # Fix image size
             torchvision.transforms.CenterCrop(224),
             torchvision.transforms.RandomRotation(20),
@@ -19,8 +18,8 @@ def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = 
             torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),  # Normalize image
             torchvision.transforms.RandomErasing()
         ])
-    else:
-        transform = torchvision.transforms.Compose([
+
+    transform = torchvision.transforms.Compose([
             torchvision.transforms.Resize(256),  # Fix image size
             torchvision.transforms.CenterCrop(224),
             torchvision.transforms.ToTensor(),
@@ -28,7 +27,7 @@ def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = 
         ])
 
     # Load dataset and apply transformation
-    train_dataset = torchvision.datasets.ImageFolder(root=os.path.join(dataset_dir, "training"), transform=transform)
+    train_dataset = torchvision.datasets.ImageFolder(root=os.path.join(dataset_dir, "training"), transform=transform_augmented)
     validation_dataset = torchvision.datasets.ImageFolder(root=os.path.join(dataset_dir, "validation"),
                                                           transform=transform)
     evaluation_dataset = torchvision.datasets.ImageFolder(root=os.path.join(dataset_dir, "evaluation"),
@@ -36,7 +35,7 @@ def get_dataloader(batch_size: int, augmented: bool = False, dataset_dir: str = 
 
     # Initialize dataloaders
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    validation_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    evaluation_loader = DataLoader(evaluation_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
+    validation_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    evaluation_loader = DataLoader(evaluation_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return train_loader, validation_loader, evaluation_loader
