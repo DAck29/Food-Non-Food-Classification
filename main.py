@@ -36,6 +36,15 @@ def save_training_results(losses, dir_results):
 
     print(f"Training results saved to {results_path}")
 
+    plot_path = os.path.join(dir_results, f"training_loss_plot_{timestamp}.png")
+    plt.figure(figsize=(12, 4))
+    plt.plot(losses)
+    plt.xlabel('Iteration')
+    plt.ylabel('Loss')
+    plt.title('Cross Entropy Loss')
+    plt.savefig(plot_path)
+    print(f"Training loss plot saved to {plot_path}")
+
 
 def main():
     # Initialize DataLoader
@@ -91,13 +100,6 @@ def main():
                 print(
                     f'Epoch [{epoch + 1}/{num_epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
 
-    # Plot training loss
-    plt.figure(figsize=(12, 4))
-    plt.plot(losses)
-    plt.xlabel('Iteration')
-    plt.ylabel('Loss')
-    plt.title('Cross Entropy Loss')
-    plt.show()
 
     # Save model to Results folder
     results_dir = results.save_model_results(model)
