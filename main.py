@@ -13,6 +13,7 @@ import results
 from datetime import datetime
 import os
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 
 # Set random seed for reproducibility
 seed = 42
@@ -24,27 +25,51 @@ torch.manual_seed(seed)  # PyTorch random seed
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 
-def save_training_results(losses, dir_results):
+def save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, dir_results):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     os.makedirs(dir_results, exist_ok=True)
     results_path = os.path.join(dir_results, f"training_results_{timestamp}.txt")
+    smoothed_train_losses = gaussian_filter1d(train_losses, sigma=7)
 
     with open(results_path, "w") as f:
         f.write("Training Losses:\n")
-        for i, loss in enumerate(losses):
+        for i, loss in enumerate(smoothed_train_losses):
             f.write(f"Iteration {i + 1}: Loss = {loss:.4f}\n")
 
     print(f"Training results saved to {results_path}")
 
     plot_path = os.path.join(dir_results, f"training_loss_plot_{timestamp}.png")
     plt.figure(figsize=(12, 4))
-    plt.plot(losses)
+    plt.plot(smoothed_train_losses)
     plt.xlabel('Iteration')
     plt.ylabel('Loss')
     plt.title('Cross Entropy Loss')
+    plt.grid()
     plt.savefig(plot_path)
     print(f"Training loss plot saved to {plot_path}")
 
+    # Save the loss curves
+    plot_path = os.path.join(dir_results, f"loss_curve{timestamp}.png")
+    plt.figure(figsize=(12, 4))
+    plt.plot(range(1, num_epochs + 1), train_losses, label='Training Loss')
+    plt.plot(range(1, num_epochs + 1), test_losses, label='Test Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid()
+    plt.savefig(plot_path)
+    print("Loss curve saved to loss_curve.png")
+
+    plot_path = os.path.join(dir_results, f"accuracy_curve{timestamp}.png")
+    plt.figure(figsize=(12, 4))
+    plt.plot(range(1, num_epochs + 1), accuracies, label='Accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy (%)')
+    plt.legend()
+    plt.grid()
+    plt.savefig(plot_path)
+    print("Accuracy curve saved to accuracy_curve.png")
+    plt.close()
 
 def main():
     # Initialize DataLoader
@@ -62,17 +87,25 @@ def main():
     print(model)
 
     # Calculate class weights
-    train_labels = train_loader.dataset.targets  
+    train_labels = train_loader.dataset.targets
     classes = np.unique(train_labels)  # Get unique class labels
-    class_weights = compute_class_weight('balanced', classes=classes, y=train_labels) 
-    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU 
+    class_weights = compute_class_weight('balanced', classes=classes, y=train_labels)
+    class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU
 
 
     # Define training parameters
-    num_epochs = 5
+    num_epochs = 20
+    train_losses = []
+    test_losses = []
+    accuracies = []
     losses = []
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+    base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    results_dir = os.path.join(base_results_dir, timestamp)
+    os.makedirs(results_dir, exist_ok=True)
 
     # Training loop
     for epoch in range(num_epochs):
@@ -82,6 +115,7 @@ def main():
 
         for batch_idx, (inputs, targets) in enumerate(tqdm(train_loader, desc="Training Progress", leave=True)):
             # Move inputs and labels to device
+            inputs, labels = (inputs, targets)
             inputs, targets = inputs.to(device), targets.to(device)
 
             # Forward pass
@@ -96,15 +130,49 @@ def main():
             loss.backward()
             optimizer.step()
 
-            if (batch_idx + 1) % 50 == 0:
-                print(
-                    f'Epoch [{epoch + 1}/{num_epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+            running_loss += loss.item() * inputs.size(0)
+
+            #if (batch_idx + 1) % 50 == 0:
+            #    print(
+            #        f'Epoch [{epoch + 1}/{num_epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+
+        train_loss = running_loss / len(train_loader.dataset)
+        train_losses.append(train_loss)
+
+        # Calculate test loss and accuracy
+        model.eval()
+        test_loss = 0.0
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for inputs, labels in val_loader:
+                inputs, labels = inputs.to(device), labels.to(device)
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+                test_loss += loss.item() * inputs.size(0)
+
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        test_loss = test_loss / len(val_loader.dataset)
+        test_losses.append(test_loss)
+        accuracy = 100 * correct / total
+        accuracies.append(accuracy)
+
+        # Save model to Results folder
+        results.save_model_results(model, results_dir, epoch)
+
+        print(
+            f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")
+        metrics_path = os.path.join(results_dir, 'epoch_metrics.txt')
+        with open(metrics_path, 'a') as f:
+            f.write(
+                f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%\n")
 
 
-    # Save model to Results folder
-    results_dir = results.save_model_results(model)
     # Save training results
-    save_training_results(losses, results_dir)
+    save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, results_dir)
 
 
 if __name__ == '__main__':
