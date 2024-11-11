@@ -2,9 +2,9 @@ import os
 import torchvision
 from torch.utils.data import DataLoader
 from typing import Tuple
+from tqdm import tqdm
 
-
-def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -> Tuple[
+def get_dataloader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
 
     transform_augmented = torchvision.transforms.Compose([
@@ -34,8 +34,8 @@ def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -
                                                           transform=transform)
 
     # Initialize dataloaders
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4)
-    validation_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-    evaluation_loader = DataLoader(evaluation_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1)
+    validation_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
+    evaluation_loader = DataLoader(evaluation_dataset, batch_size=batch_size, shuffle=False, num_workers=1)
 
     return train_loader, validation_loader, evaluation_loader
