@@ -95,8 +95,8 @@ def main():
     class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU
 
     # Plot data distribution
-    plot_data_distribution(train_loader, dataset_type="Training")
-    plot_total_images(train_loader, eval_loader, dataset_type="Food Dataset")
+    # plot_data_distribution(train_loader, dataset_type="Training")
+    # plot_total_images(train_loader, eval_loader, dataset_type="Food Dataset")
 
 
     # Define training parameters
