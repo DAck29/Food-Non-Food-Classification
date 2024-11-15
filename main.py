@@ -109,8 +109,8 @@ def main():
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
-    # base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
-    base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
+    base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
+    # base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     results_dir = os.path.join(base_results_dir, timestamp)
     os.makedirs(results_dir, exist_ok=True)
