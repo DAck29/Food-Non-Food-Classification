@@ -4,7 +4,8 @@ from torch.utils.data import DataLoader
 from typing import Tuple
 from tqdm import tqdm
 
-def get_dataloader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/food_data") -> Tuple[
+def get_dataloader(batch_size: int, dataset_dir: str = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Dataset\food_data") -> Tuple[
+# def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
 
     transform_augmented = torchvision.transforms.Compose([
