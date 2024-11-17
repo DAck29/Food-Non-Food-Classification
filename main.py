@@ -1,6 +1,8 @@
 import random
 
 from sklearn.utils import compute_class_weight
+from data_distribution import plot_data_distribution, plot_total_images
+
 
 from data_loader import get_dataloader
 from resnet_model import get_resnet50_model
@@ -161,6 +163,10 @@ def main():
     class_weights = compute_class_weight('balanced', classes=classes, y=train_labels)
     class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU
 
+    # Plot data distribution
+    # plot_data_distribution(train_loader, dataset_type="Training")
+    # plot_total_images(train_loader, eval_loader, dataset_type="Food Dataset")
+
 
     # Define training parameters
     num_epochs = 20
@@ -180,6 +186,10 @@ def main():
     best_params = None
 
     base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
+    # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
+    # base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
+    # base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
+
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     results_dir = os.path.join(base_results_dir, timestamp)
     os.makedirs(results_dir, exist_ok=True)
@@ -235,8 +245,11 @@ def main():
         test_loss = 0.0
         correct = 0
         total = 0
+        all_preds = []
+        all_labels = []
+
         with torch.no_grad():
-            for inputs, labels in val_loader:
+            for inputs, labels in eval_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 outputs = model(inputs)
                 loss = criterion(outputs, labels)
@@ -246,10 +259,19 @@ def main():
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-        test_loss = test_loss / len(val_loader.dataset)
+                # Store predictions and true labels for confusion matrix
+                all_preds.extend(predicted.cpu().numpy())    
+                all_labels.extend(labels.cpu().numpy())
+
+        test_loss = test_loss / len(eval_loader.dataset)
         test_losses.append(test_loss)
         accuracy = 100 * correct / total
         accuracies.append(accuracy)
+        
+        # Save confusion Matrix to Results folder
+        conf_matrix = results.compute_confusion_matrix(torch.tensor(all_preds), torch.tensor(all_labels), num_classes)
+        results.plot_confusion_matrix(conf_matrix, train_loader.dataset.classes, results_dir, epoch)
+
 
         # Save model to Results folder
         results.save_model_results(model, results_dir, epoch)
