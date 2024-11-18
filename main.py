@@ -4,9 +4,10 @@ from sklearn.utils import compute_class_weight
 from data_distribution import plot_data_distribution, plot_total_images
 
 
-from data_loader import get_dataloader
+from data_loader import get_dataloader, get_ood_loader
 from resnet_model import get_resnet50_model
 from tqdm import tqdm
+import OOD
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -185,9 +186,9 @@ def main():
     best_accuracy = 0
     best_params = None
 
-    base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
     # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
-    # base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
+    # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
+    base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
     # base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -207,7 +208,7 @@ def main():
             best_params = params
 
     print(f"Best Parameters: {best_params}, Best Accuracy: {best_accuracy:.2f}%")
-    """
+    
     # Training loop
     for epoch in range(num_epochs):
         model.train()
@@ -286,7 +287,15 @@ def main():
 
     # Save training results
     save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, results_dir)
-"""
+
+    # Evaluate AUROC for MSP and MaxLog
+    ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset)) # make sure that the same Nr of ID and OOD samples are processed
+    auroc_msp = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MSP")
+    auroc_maxlog = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MaxLog")
+    print(f"AUROC (MSP): {auroc_msp:.4f}")
+    print(f"AUROC (MaxLog): {auroc_maxlog:.4f}")
+
+
 
 if __name__ == '__main__':
     main()
