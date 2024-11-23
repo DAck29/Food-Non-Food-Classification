@@ -1,7 +1,6 @@
 import torch
 import os
 import torch.nn as nn
-from datetime import datetime
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -16,7 +15,7 @@ def compute_confusion_matrix(predictions, labels, num_classes):
 
     return conf_matrix
 
-def plot_confusion_matrix(conf_matrix, class_names, results_dir, epoch_nr, title='Confusion Matrix'):
+def plot_confusion_matrix(conf_matrix, class_names, results_dir: str, epoch_nr: int, title='Confusion Matrix'):
     plt.figure(figsize=(10, 7))
     sns.heatmap(conf_matrix.numpy(), annot=True, fmt='g', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
     plt.title(title)
