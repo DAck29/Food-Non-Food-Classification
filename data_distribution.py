@@ -29,19 +29,20 @@ def plot_data_distribution(data_loader: DataLoader, dataset_type: str = "Dataset
 
 
 
-def plot_total_images(train_loader: DataLoader, eval_loader: DataLoader, dataset_type: str = "Dataset"):
+def plot_total_images(train_loader: DataLoader, val_loader: DataLoader, eval_loader: DataLoader, dataset_type: str = "Dataset"):
  
     # Calculate total number of images in each dataset
     total_train_images = len(train_loader.dataset)
+    total_val_images = len(val_loader.dataset)
     total_eval_images = len(eval_loader.dataset)
 
     # Data for plotting
-    categories = ['Training', 'Evaluation']
-    image_counts = [total_train_images, total_eval_images]
+    categories = ['Training', 'Validation', 'Evaluation']
+    image_counts = [total_train_images, total_val_images, total_eval_images]
 
     # Plotting
     plt.figure(figsize=(8, 6))
-    plt.bar(categories, image_counts, color=['blue', 'orange'])
+    plt.bar(categories, image_counts, color=['blue', 'gray', 'orange'])
     plt.xlabel('Dataset Type')
     plt.ylabel('Total Number of Images')
     plt.title(f'Total Number of Images in {dataset_type}')
