@@ -73,3 +73,49 @@ def compute_auroc(model, id_loader, ood_loader, device, results_dir, method="MSP
 
 
     return auroc
+
+def compute_odin_scores(model, id_loader, ood_loader, odin_detector, device, results_dir):
+    id_scores = []
+    ood_scores = []
+
+    # Process ID data
+    with torch.no_grad():
+        for inputs, _ in id_loader:
+            inputs = inputs.to(device)
+            scores = odin_detector.predict(inputs)
+            id_scores.extend(scores.cpu().numpy())
+
+    # Process OOD data
+    with torch.no_grad():
+        for inputs, _ in ood_loader:
+            inputs = inputs.to(device)
+            scores = odin_detector.predict(inputs)
+            ood_scores.extend(scores.cpu().numpy())
+
+    # Combine scores and labels
+    scores = np.array(id_scores + ood_scores)
+    labels = np.array([1] * len(id_scores) + [0] * len(ood_scores))  # 1 for ID, 0 for OOD
+
+    # Calculate AUROC
+    auroc = roc_auc_score(labels, scores)
+
+    # Calculate TPR and FPR for ROC curve
+    fpr, tpr, _ = roc_curve(labels, scores)
+
+    # Plot AUROC curve
+    plt.figure(figsize=(8, 6))
+    plt.plot(fpr, tpr, label=f'ODIN AUROC: {auroc:.4f}')
+    plt.plot([0, 1], [0, 1], 'r--', label='Random Guess')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ODIN ROC Curve')
+    plt.legend()
+    plt.grid()
+
+    # Save Plot in the current folder
+    auroc_path = os.path.join(results_dir, "odin_roc_curve.png")
+    plt.savefig(auroc_path)
+    print(f"ODIN ROC curve saved to {auroc_path}")
+    plt.close()
+
+    return auroc
