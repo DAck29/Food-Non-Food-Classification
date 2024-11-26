@@ -20,8 +20,10 @@ from scipy.ndimage import gaussian_filter1d
 from sklearn.model_selection import ParameterGrid
 
 from pytorch_ood.detector import TemperatureScaling, ODIN
+
 from sklearn.metrics import roc_auc_score, roc_curve
 from OOD import compute_odin_scores
+from pytorch_ood.detector import ODIN
 
 # Set random seed for reproducibility
 seed = 42
@@ -189,28 +191,12 @@ def main():
     # Initialize OOD detection
     ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset))
 
-    # temperature scaling
-    class TemperatureScaledModel(torch.nn.Module):
-        def __init__(self, model, temperature):
-            super().__init__()
-            self.model = model
-            self.temperature = temperature
-
-        def forward(self, inputs):
-            outputs = self.model(inputs)
-            return outputs / self.temperature
-
-    # Temperature
-    temperature = 1000
-    scaled_model = TemperatureScaledModel(model, temperature)
-
-    # Perturbation
-    eps = 0.001  # Small perturbation magnitude for ODIN
-    odin_detector = ODIN(scaled_model, eps=eps)
+    # Initialize ODIN detector
+    odin_detector = ODIN(model, temperature=500, eps=0.02)
 
     # Evaluating ODIN
     print("Evaluating OOD detection with ODIN")
-    odin_auroc = compute_odin_scores(scaled_model, eval_loader, ood_loader, odin_detector, device, results_dir)
+    odin_auroc = compute_odin_scores(eval_loader, ood_loader, odin_detector, device, results_dir)
     print(f"ODIN AUROC: {odin_auroc:.4f}")
 
     # Evaluate AUROC for MSP and MaxLog
