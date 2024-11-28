@@ -74,7 +74,7 @@ def compute_auroc(model, id_loader, ood_loader, device, results_dir, method="MSP
 
     return auroc
 
-def compute_odin_scores(model, id_loader, ood_loader, odin_detector, device, results_dir):
+def compute_odin_scores(id_loader, ood_loader, odin_detector, device, results_dir):
     id_scores = []
     ood_scores = []
 
@@ -83,6 +83,9 @@ def compute_odin_scores(model, id_loader, ood_loader, odin_detector, device, res
         for inputs, _ in id_loader:
             inputs = inputs.to(device)
             scores = odin_detector.predict(inputs)
+            if torch.isnan(scores).any():
+                print("NaN detected in ID scores")
+                continue
             id_scores.extend(scores.cpu().numpy())
 
     # Process OOD data
@@ -90,7 +93,16 @@ def compute_odin_scores(model, id_loader, ood_loader, odin_detector, device, res
         for inputs, _ in ood_loader:
             inputs = inputs.to(device)
             scores = odin_detector.predict(inputs)
+            if torch.isnan(scores).any():
+                print("NaN detected in OOD scores")
+                continue
             ood_scores.extend(scores.cpu().numpy())
+
+    # Invert scores
+    if np.mean(id_scores) < np.mean(ood_scores):
+        print("inverting ODIN scores")
+        id_scores = [-s for s in id_scores]
+        ood_scores = [-s for s in ood_scores]
 
     # Combine scores and labels
     scores = np.array(id_scores + ood_scores)

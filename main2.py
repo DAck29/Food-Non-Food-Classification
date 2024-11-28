@@ -192,7 +192,7 @@ def main():
     ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset))
 
     # Initialize ODIN detector
-    odin_detector = ODIN(model, temperature=500, eps=0.02)
+    odin_detector = ODIN(model, temperature=1000, eps=0.001)
 
     # Evaluating ODIN
     print("Evaluating OOD detection with ODIN")
