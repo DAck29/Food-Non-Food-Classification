@@ -113,12 +113,13 @@ def plot_total_images(train_loader: DataLoader, val_loader: DataLoader, eval_loa
     # Calculate total number of images in each dataset
     total_train_images = len(train_loader.dataset)
     total_val_images = len(val_loader.dataset)
+    total_val_images = len(val_loader.dataset)
     total_eval_images = len(eval_loader.dataset)
 
 
     # Data for plotting
     categories = ['Training', 'Validation', 'Evaluation']
-    image_counts = [total_train_images, total_val_images,  total_eval_images]
+    image_counts = [total_train_images, total_val_images, total_eval_images]
 
     # Plotting
     plt.figure(figsize=(8, 4))
