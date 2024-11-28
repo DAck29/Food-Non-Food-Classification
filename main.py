@@ -1,7 +1,7 @@
 import random
 
 from sklearn.utils import compute_class_weight
-from data_distribution import plot_data_distribution, plot_total_images
+from data_distribution import plot_data_distribution, plot_total_images, plot_combined_data_distribution
 
 
 from data_loader import get_dataloader, get_ood_loader
@@ -146,6 +146,8 @@ def train_and_evaluate(model, train_loader, val_loader, criterion, optimizer, de
 def main():
     # Initialize DataLoader
     train_loader, val_loader, eval_loader = get_dataloader(batch_size=32)
+    ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset)) # make sure that the same Nr of ID and OOD samples are processed
+
 
     # Set the number of classes based on your dataset
     num_classes = len(train_loader.dataset.classes)  # Automatically set based on dataset
@@ -165,9 +167,17 @@ def main():
     class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)  # Move to GPU
 
     # Plot data distribution
-    # plot_data_distribution(train_loader, dataset_type="Training")
-    # plot_total_images(train_loader, eval_loader, dataset_type="Food Dataset")
-
+    """plot_combined_data_distribution(
+    eval_loader=eval_loader,
+    ood_loader=ood_loader,          
+    dataset_type_eval="Evaluation Data (ID)",
+    dataset_type_ood="CIFAR-10 Data (OOD)")
+    """
+    #plot_data_distribution(train_loader, dataset_type="Training")
+    #plot_data_distribution(val_loader, dataset_type="Validation")
+    #plot_data_distribution(eval_loader, dataset_type="Evaluation")
+    #plot_total_images(train_loader, val_loader, eval_loader, dataset_type="Food Dataset")
+    
 
     # Define training parameters
     num_epochs = 20
@@ -188,8 +198,8 @@ def main():
 
     # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
     # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
-    base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
-    # base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
+    # base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
+    base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     results_dir = os.path.join(base_results_dir, timestamp)
@@ -289,7 +299,6 @@ def main():
     save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, results_dir)
 
     # Evaluate AUROC for MSP and MaxLog
-    ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset)) # make sure that the same Nr of ID and OOD samples are processed
     auroc_msp = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MSP")
     auroc_maxlog = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MaxLog")
     print(f"AUROC (MSP): {auroc_msp:.4f}")
