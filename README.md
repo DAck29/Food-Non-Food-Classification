@@ -1,10 +1,101 @@
-# Food-Non-Food-Classification
-Uni Bern Semesterproject for Data-Driven Diabetes Management course
+Food-Non-Food Classification
 
-1) build data loaders
-has access to all images but only loads the number in bat size that has been given to the neuronal network
-different for the steps (Ende Oktober)
-2) process images
-normalize, and maybe change rotation, etc. make img in fixed size
-3) model creation
-4) non-food classification
+Welcome fellow coders, tech enthusiasts, designers or curious minds to our project. We are thrilled to have you here and excited to show you around in our project.
+
+Table of Contents
+
+    Project Overview
+    Setup
+    Usage
+    Contributing
+    License
+
+Project Overview
+
+This project..
+
+Please use the Anaconda Prompt instead of the terminal/powershell to avoid package installation problems. In the anaconda prompt, Navigate to a directory of your choice, e.g.,
+
+cd Documents/DataScience
+
+Step 1: Clone the Repository
+
+First, navigate to a directory of your choice, e.g.,
+
+cd Documents/DataScience
+
+Then, clone the repo to this directory:
+
+git clone https://github.com/PythonDataScience24/Image-Gallery-and-Deep-Learning-for-image-editing-and-analysis.git
+
+Navigate to the newly created directory:
+
+cd Image-Gallery-and-Deep-Learning-for-image-editing-and-analysis/Homework10
+
+Step 2: Open Anaconda Prompt
+
+To avoid any compatibility issues, we recommend to use the anaconda prompt that comes with your installation of Anaconda.
+Step 3: Create a new conda environment
+
+Create a new conda environment with python 3.8. "myenv" is the name of your environment which you are free to adjust.
+
+conda create --name myenv python=3.8
+
+Step 4: Activate the conda environment
+
+conda activate myenv
+
+Step 5: Install dependencies from 'requirements.txt'
+
+Install all required dependencies using pip:
+
+pip install -r requirements.txt
+
+Navigate:
+
+cd Homework10
+
+Note: We have included a conda command to install. It is commented out but if you wish to do so, you can use that command and not do it by pip. Here you are expected to be able to use conda installation. We recommend however to do so as instructed above using pip for easier installation and access.
+
+You are now ready to run the python files. Continue with "Usage" to learn how to use the files.
+Usage
+
+The basic functionality of this project is to:
+
+    Upload and manage images
+    Perform basic editing
+    Run models
+    Interpret outputs
+
+Important: The zip files (building_images.zip, x_ray_images.zip) are extracted by running our code and further creates folders (building_images, Forests, resized_Img, xray_dataset). These created folders can be deleted after running our app as these will be created next time you run the app. Do not delete anything else!
+
+Start here: While being in the anaconda prompt from before, type:
+
+python main.py
+
+From here on you will instructed via user interface to navigate. Start with Image Gallery to create all necessary files for running CNN later.
+
+Img_Gallery_Examples.py - this will unpack the images and give a small demonstration of the ImgEditorGallery class. Ensure you are in the file directory when running the file. This file relies on Img_Gallery.py. After having run this, the dataset should be ready and you can move on to the next step.
+
+Run CNN.py - this file relies on CNN_utils.py. For memory reasons we set n_epochs to only 2. Feel free to adjust. If you want use UBELIX GPU there is a SLURM script ready to use.
+Expected Output
+
+Datasets are prepared in dedicated folders.
+
+Image editings like size, name, and location.
+
+Visualization of various example images results from the trained CNN network.
+Contributing
+
+We highly welcome and encourage contributions to the project. Please refer to CONTRIBUTING.md for more details on how to submit pull requests or issues.
+License
+
+The project is licensed under "MIT" license. See LICENSE.md file for more details.
+Contact
+
+For any questions, collaborations or support, you can contact us at:
+
+    Ackermann Denise: denise.ackermann@students.unibe.ch
+    Amrein Manuel: manuel.amrein@students.unibe.ch
+    Palmgrove Noel Roy: noel.palmgrove@students.unibe.ch
+
