@@ -1,11 +1,13 @@
 import os
 import random
+import os
+import random
 import torchvision
 from torch.utils.data import DataLoader, Subset
 from typing import Tuple
 
 # def get_dataloader(batch_size: int, dataset_dir: str = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Dataset\food_data") -> Tuple[
-def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -> Tuple[
+def get_dataloader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/food_data") -> Tuple[
     DataLoader, DataLoader, DataLoader]:
 
     transform_augmented = torchvision.transforms.Compose([
@@ -45,7 +47,7 @@ def get_dataloader(batch_size: int, dataset_dir: str = "../Dataset/food_data") -
 
 
 
-def get_ood_loader(batch_size: int, dataset_dir: str = "../Dataset/cifar-10-batches-py", num_samples: int = 10000, seed: int = 42) -> DataLoader:
+def get_ood_loader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/cifar-10-batches-py", num_samples: int = 10000, seed: int = 42) -> DataLoader:
 
     # Define transformation for the OOD dataset (CIFAR-10)
     transform_ood = torchvision.transforms.Compose([
