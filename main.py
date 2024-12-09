@@ -1,6 +1,7 @@
 import random
 
 from sklearn.utils import compute_class_weight
+from sklearn.metrics import roc_curve, roc_auc_score
 from data_distribution import plot_data_distribution, plot_total_images
 
 
@@ -29,57 +30,14 @@ torch.manual_seed(seed)  # PyTorch random seed
 if torch.cuda.is_available():
     torch.cuda.manual_seed_all(seed)
 
-def save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, dir_results):
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    os.makedirs(dir_results, exist_ok=True)
-    results_path = os.path.join(dir_results, f"training_results_{timestamp}.txt")
-    smoothed_train_losses = gaussian_filter1d(train_losses, sigma=7)
-
-    with open(results_path, "w") as f:
-        f.write("Training Losses:\n")
-        for i, loss in enumerate(smoothed_train_losses):
-            f.write(f"Iteration {i + 1}: Loss = {loss:.4f}\n")
-
-    print(f"Training results saved to {results_path}")
-
-    plot_path = os.path.join(dir_results, f"training_loss_plot_{timestamp}.png")
-    plt.figure(figsize=(12, 4))
-    plt.plot(smoothed_train_losses)
-    plt.xlabel('Iteration')
-    plt.ylabel('Loss')
-    plt.title('Cross Entropy Loss')
-    plt.grid()
-    plt.savefig(plot_path)
-    print(f"Training loss plot saved to {plot_path}")
-
-    # Save the loss curves
-    plot_path = os.path.join(dir_results, f"loss_curve{timestamp}.png")
-    plt.figure(figsize=(12, 4))
-    plt.plot(range(1, num_epochs + 1), train_losses, label='Training Loss')
-    plt.plot(range(1, num_epochs + 1), test_losses, label='Test Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.grid()
-    plt.savefig(plot_path)
-    print("Loss curve saved to loss_curve.png")
-
-    plot_path = os.path.join(dir_results, f"accuracy_curve{timestamp}.png")
-    plt.figure(figsize=(12, 4))
-    plt.plot(range(1, num_epochs + 1), accuracies, label='Accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy (%)')
-    plt.legend()
-    plt.grid()
-    plt.savefig(plot_path)
-    print("Accuracy curve saved to accuracy_curve.png")
-    plt.close()
-
-def train_and_evaluate(model, train_loader, val_loader, criterion, optimizer, device, num_epochs, results_dir):
+def train_and_validate(model, train_loader, val_loader, eval_loader, ood_loader, criterion, optimizer, device, num_epochs, results_dir, hyperparams):
     train_losses = []
-    test_losses = []
+    val_losses = []
     accuracies = []
-    losses = []
+
+    # Initialize the cumulative confusion matrix
+    num_classes = len(train_loader.dataset.classes)
+    cumulative_conf_matrix = torch.zeros(num_classes, num_classes)
 
     # Training loop
     for epoch in range(num_epochs):
@@ -89,14 +47,13 @@ def train_and_evaluate(model, train_loader, val_loader, criterion, optimizer, de
 
         for batch_idx, (inputs, targets) in enumerate(tqdm(train_loader, desc="Training Progress", leave=True)):
             # Move inputs and labels to device
-            inputs, labels = inputs.to(device), targets.to(device)
+            inputs, targets = inputs.to(device), targets.to(device)
 
             # Forward pass
             outputs = model(inputs)
 
             # Calculate loss
             loss = criterion(outputs, targets)
-            losses.append(loss.item())
 
             # Backward pass and optimization
             optimizer.zero_grad()
@@ -110,42 +67,195 @@ def train_and_evaluate(model, train_loader, val_loader, criterion, optimizer, de
 
         # Calculate test loss and accuracy
         model.eval()
-        test_loss = 0.0
+        val_loss = 0.0
         correct = 0
         total = 0
+        all_predictions = []
+        all_labels = []
         with torch.no_grad():
-            for inputs, labels in val_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
+            for inputs, targets in val_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
                 outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                test_loss += loss.item() * inputs.size(0)
+                loss = criterion(outputs, targets)
+                val_loss += loss.item() * inputs.size(0)
 
                 _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                total += targets.size(0)
+                correct += (predicted == targets).sum().item()
 
-        test_loss = test_loss / len(val_loader.dataset)
-        test_losses.append(test_loss)
+                all_predictions.append(predicted)
+                all_labels.append(targets)
+
+        val_loss = val_loss / len(val_loader.dataset)
+        val_losses.append(val_loss)
         accuracy = 100 * correct / total
         accuracies.append(accuracy)
+
+        evaluate_model_epoch(model,eval_loader, criterion, device, results_dir, epoch_nr=epoch, num_epochs=num_epochs)
+
+        # Initialize dictionaries to store results for different methods
+        auroc_results = {}
+        fpr_at_95_results = {}
+        roc_data_dict = {}
+
+
+        # Evaluate each method and store results
+        for method in ["MSP", "MaxLog", "ODIN"]:
+            auroc, fpr_at_95_tpr = OOD.compute_auroc_epoch(model, eval_loader, ood_loader, device, results_dir, method=method, epoch_nr=epoch)
+            auroc_results[method] = auroc
+            fpr_at_95_results[method] = fpr_at_95_tpr
+            print(f"AUROC ({method}): {auroc:.4f}")
+            print(f"FPR at 95% TPR ({method}): {fpr_at_95_tpr:.4f}")
+            # Calculate FPR and TPR for combined plot and store them in roc_data_dict
+            scores = np.array([1] * len(eval_loader.dataset) + [0] * len(ood_loader.dataset))
+            labels = np.array([1] * len(eval_loader.dataset) + [0] * len(ood_loader.dataset))
+            fpr, tpr, _ = roc_curve(labels, scores)
+
+            roc_data_dict[method] = (fpr, tpr, auroc)
+
+        # Plot the AUROC and FPR@95TPR as bar charts
+        OOD.plot_auroc_curves_epoch(roc_data_dict, results_dir, epoch_nr=epoch)
+        OOD.plot_metrics_bar_chart_epoch(auroc_results, fpr_at_95_results, results_dir, epoch_nr=epoch)
+
+        # Compute confusion matrix
+        all_predictions = torch.cat(all_predictions)
+        all_labels = torch.cat(all_labels)
+        conf_matrix = results.compute_confusion_matrix(all_predictions, all_labels,
+                                                       num_classes=len(train_loader.dataset.classes))
+        # Update cumulative confusion matrix
+        cumulative_conf_matrix += conf_matrix
+
+        # Plot and save confusion matrix
+        results.plot_confusion_matrix(
+            conf_matrix=conf_matrix,
+            class_names=train_loader.dataset.classes,
+            results_dir=results_dir,
+            epoch_nr=epoch
+        )
+        # Plot the cumulative confusion matrix
+        results.plot_all_confusion_matrices(
+            conf_matrix=cumulative_conf_matrix,
+            class_names=train_loader.dataset.classes,
+            results_dir=results_dir
+        )
 
         # Save model to Results folder
         results.save_model_results(model, results_dir, epoch)
 
-        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")
+        print(f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Test Loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%")
         metrics_path = os.path.join(results_dir, 'epoch_metrics.txt')
         with open(metrics_path, 'a') as f:
-            f.write(f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%\n")
+            f.write(
+                f"Epoch {epoch + 1}/{num_epochs}, Hyperparameters: {hyperparams}, Train Loss: {train_loss:.4f}, Test Loss: {val_loss:.4f}, Accuracy: {accuracy:.2f}%\n")
 
+        ood_metrics_path = os.path.join(results_dir, 'ood_metrics.txt')
+        with open(ood_metrics_path, 'a') as f:
+            f.write(f"Epoch {epoch + 1}/{num_epochs}, Hyperparameters: {hyperparams}\n")
+            for method in ["MSP", "MaxLog", "ODIN"]:
+                f.write(
+                    f"{method} - AUROC: {auroc_results[method]:.4f}, FPR at 95% TPR: {fpr_at_95_results[method]:.4f}\n")
+            f.write("\n")
     # Save training results
-    save_training_results(losses, train_losses, test_losses, num_epochs, accuracies, results_dir)
+    results.save_training_results(train_losses, val_losses, num_epochs, accuracies, results_dir)
+    results.plot_all_confusion_matrices(cumulative_conf_matrix, train_loader.dataset.classes, results_dir)
+
+    return accuracies
+
+def evaluate_model_epoch(model, eval_loader, criterion, device, results_dir, epoch_nr, num_epochs):
+    model.eval()
+    eval_loss = 0.0
+    correct = 0
+    total = 0
+    all_predictions = []
+    all_labels = []
+    with torch.no_grad():
+        for inputs, targets in eval_loader:
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            eval_loss += loss.item() * inputs.size(0)
+
+            _, predicted = torch.max(outputs.data, 1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+
+            # Collect predictions and labels
+            all_predictions.append(predicted)
+            all_labels.append(targets)
+
+    eval_loss = eval_loss / len(eval_loader.dataset)
+    accuracy = 100 * correct / total
+
+    # Compute confusion matrix
+    all_predictions = torch.cat(all_predictions)
+    all_labels = torch.cat(all_labels)
+    conf_matrix = results.compute_confusion_matrix(all_predictions, all_labels,
+                                                   num_classes=len(eval_loader.dataset.classes))
+
+    # Plot and save confusion matrix
+    results.plot_evol_confusion_matrix(
+        conf_matrix=conf_matrix,
+        class_names=eval_loader.dataset.classes,
+        results_dir=results_dir
+    )
+
+    print(f"Epoch [{epoch_nr + 1}/{num_epochs}], Evaluation Loss: {eval_loss:.4f}, Evaluation Accuracy: {accuracy:.2f}%")
+    metrics_path = os.path.join(results_dir, 'evaluation_metrics.txt')
+    with open(metrics_path, 'a') as f:
+        f.write(f"Epoch {epoch_nr + 1}/{num_epochs}, Evaluation Loss: {eval_loss:.4f}, Evaluation Accuracy: {accuracy:.2f}%\n")
 
 
+def evaluate_model(model, eval_loader, criterion, device, results_dir):
+    model.eval()
+    eval_loss = 0.0
+    correct = 0
+    total = 0
+    all_predictions = []
+    all_labels = []
+    with torch.no_grad():
+        for inputs, targets in eval_loader:
+            inputs, targets = inputs.to(device), targets.to(device)
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            eval_loss += loss.item() * inputs.size(0)
+
+            _, predicted = torch.max(outputs.data, 1)
+            total += targets.size(0)
+            correct += (predicted == targets).sum().item()
+
+            # Collect predictions and labels
+            all_predictions.append(predicted)
+            all_labels.append(targets)
+
+    eval_loss = eval_loss / len(eval_loader.dataset)
+    accuracy = 100 * correct / total
+
+    # Compute confusion matrix
+    all_predictions = torch.cat(all_predictions)
+    all_labels = torch.cat(all_labels)
+    conf_matrix = results.compute_confusion_matrix(all_predictions, all_labels,
+                                                   num_classes=len(eval_loader.dataset.classes))
+
+    # Plot and save confusion matrix
+    results.plot_evol_confusion_matrix(
+        conf_matrix=conf_matrix,
+        class_names=eval_loader.dataset.classes,
+        results_dir=results_dir
+    )
+
+    print(f"Evaluation Loss: {eval_loss:.4f}, Evaluation Accuracy: {accuracy:.2f}%")
+    metrics_path = os.path.join(results_dir, 'evaluation_metrics.txt')
+    with open(metrics_path, 'a') as f:
+        f.write(f"Evaluation Loss: {eval_loss:.4f}, Evaluation Accuracy: {accuracy:.2f}%\n")
 
 
 def main():
     # Initialize DataLoader
     train_loader, val_loader, eval_loader = get_dataloader(batch_size=32)
+
+    # Evaluate AUROC for MSP, MaxLog, and ODIN
+    ood_loader = get_ood_loader(batch_size=32, num_samples=len(
+        eval_loader.dataset))  # Make sure that the same Nr of ID and OOD samples are processed
 
     # Set the number of classes based on your dataset
     num_classes = len(train_loader.dataset.classes)  # Automatically set based on dataset
@@ -166,17 +276,12 @@ def main():
 
     # Plot data distribution
     # plot_data_distribution(train_loader, dataset_type="Training")
-    # plot_total_images(train_loader, eval_loader, dataset_type="Food Dataset")
+    # plot_total_images(train_loader, val_loader, eval_loader, dataset_type="Food Dataset")
 
 
     # Define training parameters
     num_epochs = 20
-    train_losses = []
-    test_losses = []
-    accuracies = []
-    losses = []
     criterion = nn.CrossEntropyLoss(weight=class_weights)
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
     param_grid = {
         'lr': [0.001, 0.01],
@@ -185,10 +290,12 @@ def main():
 
     best_accuracy = 0
     best_params = None
+    accuracies = []
 
+    base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
+    #base_results_dir = 'Results'
     # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
-    # base_results_dir = '/storage/homefs/da17u029/DD_DM/Food-Non-Food-Classification/Results'
-    base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
+    #base_results_dir = '/storage/homefs/ma20e073/FoodClassifierScript/Results'
     # base_results_dir = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Food-Non-Food-Classification-1\Results"
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -196,104 +303,59 @@ def main():
     os.makedirs(results_dir, exist_ok=True)
 
     for params in ParameterGrid(param_grid):
+        # Create subfolder for each hyperparameter combination
+        subfolder_name = f"lr_{params['lr']}_momentum_{params['momentum']}"
+        hyperparam_results_dir = os.path.join(results_dir, subfolder_name)
+        os.makedirs(hyperparam_results_dir, exist_ok=True)
+
         print(f"Training with parameters: {params}")
         optimizer = optim.SGD(model.parameters(), lr=params['lr'], momentum=params['momentum'])
 
-        train_and_evaluate(model, train_loader, val_loader, criterion, optimizer, device, num_epochs, results_dir)
+        accuracies = train_and_validate(model, train_loader, val_loader, eval_loader, ood_loader, criterion, optimizer, device, num_epochs, hyperparam_results_dir, hyperparams=params)
 
         # Evaluate on validation set
-        accuracy = accuracies[-1]  # Get the last recorded accuracy
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            best_params = params
+        if accuracies:
+            accuracy = accuracies[-1]  # Get the last recorded accuracy
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_params = params
+                best_model_path = os.path.join(results_dir, 'best_model.pth')
+                torch.save(model.state_dict(), best_model_path)
 
     print(f"Best Parameters: {best_params}, Best Accuracy: {best_accuracy:.2f}%")
-    
-    # Training loop
-    for epoch in range(num_epochs):
-        model.train()
-        running_loss = 0.0
-        print(f"Epoch {epoch + 1}/{num_epochs}")
 
-        for batch_idx, (inputs, targets) in enumerate(tqdm(train_loader, desc="Training Progress", leave=True)):
-            # Move inputs and labels to device
-            inputs, labels = (inputs, targets)
-            inputs, targets = inputs.to(device), targets.to(device)
+    best_params_file = os.path.join(results_dir, 'best_hyperparameters.txt')
+    with open(best_params_file, 'w') as f:
+        f.write(f"Best Parameters: {best_params}, Best Accuracy: {best_accuracy:.2f}%\n")
 
-            # Forward pass
-            outputs = model(inputs)
+    # Evaluate the model on the evaluation set
+    evaluate_model(model, eval_loader, criterion, device, results_dir)
 
-            # Calculate loss
-            loss = criterion(outputs, targets)
-            losses.append(loss.item())
+    checkpoint = torch.load(best_model_path, map_location=device)
+    model.load_state_dict(checkpoint)
 
-            # Backward pass and optimization
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+    # Initialize dictionaries to store results for different methods
+    auroc_results = {}
+    fpr_at_95_results = {}
+    roc_data_dict = {}
 
-            running_loss += loss.item() * inputs.size(0)
+    # Evaluate each method and store results
+    for method in ["MSP", "MaxLog", "ODIN"]:
+        auroc, fpr_at_95_tpr = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method=method)
+        auroc_results[method] = auroc
+        fpr_at_95_results[method] = fpr_at_95_tpr
+        print(f"AUROC ({method}): {auroc:.4f}")
+        print(f"FPR at 95% TPR ({method}): {fpr_at_95_tpr:.4f}")
+        # Calculate FPR and TPR for combined plot and store them in roc_data_dict
+        scores = np.array([1] * len(eval_loader.dataset) + [0] * len(ood_loader.dataset))
+        labels = np.array([1] * len(eval_loader.dataset) + [0] * len(ood_loader.dataset))
+        fpr, tpr, _ = roc_curve(labels, scores)
 
-            #if (batch_idx + 1) % 50 == 0:
-            #    print(
-            #        f'Epoch [{epoch + 1}/{num_epochs}], Step [{batch_idx + 1}/{len(train_loader)}], Loss: {loss.item():.4f}')
+        roc_data_dict[method] = (fpr, tpr, auroc)
 
-        train_loss = running_loss / len(train_loader.dataset)
-        train_losses.append(train_loss)
-
-        # Calculate test loss and accuracy
-        model.eval()
-        test_loss = 0.0
-        correct = 0
-        total = 0
-        all_preds = []
-        all_labels = []
-
-        with torch.no_grad():
-            for inputs, labels in eval_loader:
-                inputs, labels = inputs.to(device), labels.to(device)
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-                test_loss += loss.item() * inputs.size(0)
-
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-                # Store predictions and true labels for confusion matrix
-                all_preds.extend(predicted.cpu().numpy())    
-                all_labels.extend(labels.cpu().numpy())
-
-        test_loss = test_loss / len(eval_loader.dataset)
-        test_losses.append(test_loss)
-        accuracy = 100 * correct / total
-        accuracies.append(accuracy)
-        
-        # Save confusion Matrix to Results folder
-        conf_matrix = results.compute_confusion_matrix(torch.tensor(all_preds), torch.tensor(all_labels), num_classes)
-        results.plot_confusion_matrix(conf_matrix, train_loader.dataset.classes, results_dir, epoch)
-
-
-        # Save model to Results folder
-        results.save_model_results(model, results_dir, epoch)
-
-        print(
-            f"Epoch [{epoch + 1}/{num_epochs}], Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%")
-        metrics_path = os.path.join(results_dir, 'epoch_metrics.txt')
-        with open(metrics_path, 'a') as f:
-            f.write(
-                f"Epoch {epoch + 1}/{num_epochs}, Train Loss: {train_loss:.4f}, Test Loss: {test_loss:.4f}, Accuracy: {accuracy:.2f}%\n")
-
-
-    # Save training results
-    save_training_results(losses,train_losses, test_losses, num_epochs,accuracies, results_dir)
-
-    # Evaluate AUROC for MSP and MaxLog
-    ood_loader = get_ood_loader(batch_size=32, num_samples=len(eval_loader.dataset)) # make sure that the same Nr of ID and OOD samples are processed
-    auroc_msp = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MSP")
-    auroc_maxlog = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method="MaxLog")
-    print(f"AUROC (MSP): {auroc_msp:.4f}")
-    print(f"AUROC (MaxLog): {auroc_maxlog:.4f}")
+    # Plot the AUROC and FPR@95TPR as bar charts
+    OOD.plot_auroc_curves(roc_data_dict, results_dir)
+    OOD.plot_metrics_bar_chart(auroc_results, fpr_at_95_results, results_dir)
 
 
 
