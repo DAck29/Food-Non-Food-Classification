@@ -2,18 +2,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.utils.data import DataLoader
 
+
 def plot_data_distribution(data_loader: DataLoader, dataset_type: str = "Dataset"):
-  
     # Get class labels and counts
     labels = data_loader.dataset.targets
     classes, counts = np.unique(labels, return_counts=True)
-    
+
     # Retrieve class names directly from the dataset
-    class_names = data_loader.dataset.classes  
-    
+    class_names = data_loader.dataset.classes
+
     # Plotting
-    plt.figure(figsize=(10, 6))
-    plt.bar(class_names, counts, color='skyblue') 
+    plt.figure()
+    plt.bar(class_names, counts, color='skyblue')
     plt.xlabel("Class Labels")
     plt.ylabel("Count")
     plt.title(f"{dataset_type} Data Distribution by Class")
@@ -28,9 +28,8 @@ def plot_data_distribution(data_loader: DataLoader, dataset_type: str = "Dataset
     plt.savefig(f"{dataset_type.lower()}_data_distribution_histogram.png", format='png')
 
 
-
-def plot_total_images(train_loader: DataLoader, val_loader: DataLoader, eval_loader: DataLoader, dataset_type: str = "Dataset"):
- 
+def plot_total_images(train_loader: DataLoader, val_loader: DataLoader, eval_loader: DataLoader,
+                      dataset_type: str = "Dataset"):
     # Calculate total number of images in each dataset
     total_train_images = len(train_loader.dataset)
     total_val_images = len(val_loader.dataset)
@@ -41,13 +40,13 @@ def plot_total_images(train_loader: DataLoader, val_loader: DataLoader, eval_loa
     image_counts = [total_train_images, total_val_images, total_eval_images]
 
     # Plotting
-    plt.figure(figsize=(8, 6))
+    plt.figure()
     plt.bar(categories, image_counts, color=['blue', 'gray', 'orange'])
     plt.xlabel('Dataset Type')
     plt.ylabel('Total Number of Images')
     plt.title(f'Total Number of Images in {dataset_type}')
     plt.xticks(rotation=0)
-    
+
     # Annotate counts on each bar
     for i, count in enumerate(image_counts):
         plt.text(i, count + 10, str(count), ha='center', va='bottom')
