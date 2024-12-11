@@ -28,7 +28,7 @@ def plot_confusion_matrix(conf_matrix, class_names, results_dir: str, epoch_nr: 
     plt.savefig(confusion_matrix_path)
     plt.close()
 
-def plot_evol_confusion_matrix(conf_matrix, class_names, results_dir: str, title='Confusion Matrix'):
+def plot_evol_confusion_matrix(conf_matrix, class_names, results_dir: str, epoch_nr: int, title='Confusion Matrix'):
     plt.figure()
     sns.heatmap(conf_matrix.numpy(), annot=True, fmt='g', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
     plt.title(title, fontsize=16)
@@ -36,7 +36,7 @@ def plot_evol_confusion_matrix(conf_matrix, class_names, results_dir: str, title
     plt.ylabel('True Labels', fontsize=14)
     plt.tight_layout()
 
-    confusion_matrix_path = os.path.join(results_dir, f"confusion_matrix_epoch_evaluation.png")
+    confusion_matrix_path = os.path.join(results_dir, f"confusion_matrix_eval_epoch_{epoch_nr + 1}.png")
     plt.savefig(confusion_matrix_path)
     plt.close()
 

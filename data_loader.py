@@ -6,9 +6,25 @@ import torchvision
 from torch.utils.data import DataLoader, Subset
 from typing import Tuple
 
-# def get_dataloader(batch_size: int, dataset_dir: str = r"C:\Users\manu_\OneDrive - Universitaet Bern\03 HS24 UniBe-VIVO\05 Diabetes Management\GitHub_Clone\Dataset\food_data") -> Tuple[
-def get_dataloader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/food_data") -> Tuple[
+
+# relative path
+parent_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+id_dataset_dir = os.path.join((parent_folder), "Dataset", "food_data")
+
+
+def get_dataloader(batch_size: int, dataset_dir: str = id_dataset_dir) -> Tuple[
     DataLoader, DataLoader, DataLoader]:
+
+    """
+    Creates DataLoaders for training, validation, and evaluation sets.
+
+    Args:
+        batch_size: samples per batch.
+        dataset_dir: directory containing datasets.
+
+    Returns:
+        Tuple[DataLoader, DataLoader, DataLoader]: DataLoaders for training, validation, and evaluation datasets.
+    """
 
     transform_augmented = torchvision.transforms.Compose([
             torchvision.transforms.Resize(256),  # Fix image size
@@ -45,9 +61,24 @@ def get_dataloader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029
 
 
 
+# relative path
+parent_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ood_dataset_dir = os.path.join((parent_folder), "Dataset", "cifar-10-batches-py")
 
+def get_ood_loader(batch_size: int, dataset_dir: str = ood_dataset_dir, num_samples: int = 10000, seed: int = 42) -> DataLoader:
 
-def get_ood_loader(batch_size: int, dataset_dir: str = "/storage/homefs/da17u029/DD_DM/Dataset/cifar-10-batches-py", num_samples: int = 10000, seed: int = 42) -> DataLoader:
+    """
+    CreatesDataLoader for an cifar10 out-of-distribution (OOD) dataset.
+
+    Args:
+        batch_size: Samples per batch.
+        dataset_dir: directory containing CIFAR-10 data.
+        num_samples: Nr of samples to load from the dataset.
+        seed: Fixed random seed for reproducability.
+
+    Returns:
+        DataLoader: DataLoader for the CIFAR-10 subset.
+    """
 
     # Define transformation for the OOD dataset (CIFAR-10)
     transform_ood = torchvision.transforms.Compose([
