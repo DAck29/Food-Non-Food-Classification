@@ -1,0 +1,100 @@
+Epoch 1/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9534, FPR at 95% TPR: 0.2817
+MaxLog - AUROC: 0.9666, FPR at 95% TPR: 0.2057
+ODIN - AUROC: 0.9577, FPR at 95% TPR: 0.2990
+
+Epoch 2/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9630, FPR at 95% TPR: 0.2440
+MaxLog - AUROC: 0.9842, FPR at 95% TPR: 0.0664
+ODIN - AUROC: 0.9679, FPR at 95% TPR: 0.2249
+
+Epoch 3/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9746, FPR at 95% TPR: 0.1746
+MaxLog - AUROC: 0.9923, FPR at 95% TPR: 0.0173
+ODIN - AUROC: 0.9771, FPR at 95% TPR: 0.0945
+
+Epoch 4/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9650, FPR at 95% TPR: 0.2315
+MaxLog - AUROC: 0.9897, FPR at 95% TPR: 0.0353
+ODIN - AUROC: 0.9709, FPR at 95% TPR: 0.1914
+
+Epoch 5/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9603, FPR at 95% TPR: 0.3110
+MaxLog - AUROC: 0.9903, FPR at 95% TPR: 0.0215
+ODIN - AUROC: 0.9675, FPR at 95% TPR: 0.2428
+
+Epoch 6/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9713, FPR at 95% TPR: 0.1944
+MaxLog - AUROC: 0.9934, FPR at 95% TPR: 0.0179
+ODIN - AUROC: 0.9772, FPR at 95% TPR: 0.1322
+
+Epoch 7/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9728, FPR at 95% TPR: 0.1800
+MaxLog - AUROC: 0.9937, FPR at 95% TPR: 0.0054
+ODIN - AUROC: 0.9793, FPR at 95% TPR: 0.0963
+
+Epoch 8/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9748, FPR at 95% TPR: 0.1537
+MaxLog - AUROC: 0.9950, FPR at 95% TPR: 0.0066
+ODIN - AUROC: 0.9805, FPR at 95% TPR: 0.0819
+
+Epoch 9/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9682, FPR at 95% TPR: 0.2201
+MaxLog - AUROC: 0.9935, FPR at 95% TPR: 0.0096
+ODIN - AUROC: 0.9803, FPR at 95% TPR: 0.0718
+
+Epoch 10/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9710, FPR at 95% TPR: 0.2081
+MaxLog - AUROC: 0.9936, FPR at 95% TPR: 0.0120
+ODIN - AUROC: 0.9885, FPR at 95% TPR: 0.0317
+
+Epoch 11/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9794, FPR at 95% TPR: 0.1232
+MaxLog - AUROC: 0.9956, FPR at 95% TPR: 0.0036
+ODIN - AUROC: 0.9845, FPR at 95% TPR: 0.0568
+
+Epoch 12/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9754, FPR at 95% TPR: 0.1579
+MaxLog - AUROC: 0.9951, FPR at 95% TPR: 0.0012
+ODIN - AUROC: 0.9881, FPR at 95% TPR: 0.0215
+
+Epoch 13/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9675, FPR at 95% TPR: 0.2578
+MaxLog - AUROC: 0.9914, FPR at 95% TPR: 0.0144
+ODIN - AUROC: 0.9874, FPR at 95% TPR: 0.0305
+
+Epoch 14/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9740, FPR at 95% TPR: 0.1884
+MaxLog - AUROC: 0.9939, FPR at 95% TPR: 0.0078
+ODIN - AUROC: 0.9921, FPR at 95% TPR: 0.0114
+
+Epoch 15/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9713, FPR at 95% TPR: 0.1872
+MaxLog - AUROC: 0.9941, FPR at 95% TPR: 0.0036
+ODIN - AUROC: 0.9896, FPR at 95% TPR: 0.0156
+
+Epoch 16/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9714, FPR at 95% TPR: 0.2159
+MaxLog - AUROC: 0.9942, FPR at 95% TPR: 0.0042
+ODIN - AUROC: 0.9909, FPR at 95% TPR: 0.0167
+
+Epoch 17/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9686, FPR at 95% TPR: 0.2703
+MaxLog - AUROC: 0.9953, FPR at 95% TPR: 0.0024
+ODIN - AUROC: 0.9900, FPR at 95% TPR: 0.0108
+
+Epoch 18/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9627, FPR at 95% TPR: 0.3254
+MaxLog - AUROC: 0.9926, FPR at 95% TPR: 0.0179
+ODIN - AUROC: 0.9834, FPR at 95% TPR: 0.0574
+
+Epoch 19/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9700, FPR at 95% TPR: 0.2392
+MaxLog - AUROC: 0.9952, FPR at 95% TPR: 0.0036
+ODIN - AUROC: 0.9922, FPR at 95% TPR: 0.0144
+
+Epoch 20/20, Hyperparameters: {'lr': 0.001, 'momentum': 0.9}
+MSP - AUROC: 0.9685, FPR at 95% TPR: 0.2446
+MaxLog - AUROC: 0.9940, FPR at 95% TPR: 0.0108
+ODIN - AUROC: 0.9887, FPR at 95% TPR: 0.0185
+

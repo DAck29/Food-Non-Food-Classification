@@ -1,0 +1,21 @@
+Training Losses:
+Iteration 1: Loss = 0.6257
+Iteration 2: Loss = 0.6182
+Iteration 3: Loss = 0.6036
+Iteration 4: Loss = 0.5827
+Iteration 5: Loss = 0.5562
+Iteration 6: Loss = 0.5256
+Iteration 7: Loss = 0.4920
+Iteration 8: Loss = 0.4568
+Iteration 9: Loss = 0.4212
+Iteration 10: Loss = 0.3863
+Iteration 11: Loss = 0.3531
+Iteration 12: Loss = 0.3223
+Iteration 13: Loss = 0.2944
+Iteration 14: Loss = 0.2698
+Iteration 15: Loss = 0.2488
+Iteration 16: Loss = 0.2313
+Iteration 17: Loss = 0.2174
+Iteration 18: Loss = 0.2071
+Iteration 19: Loss = 0.2003
+Iteration 20: Loss = 0.1969
