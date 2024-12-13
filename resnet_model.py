@@ -16,7 +16,6 @@ def get_resnet50_model(num_classes: int = 2, pretrained: bool = True) -> nn.Modu
     - nn.Module: Modified ResNet50 model with an updated fully connected layer.
     """
     # Load the pretrained ResNet50 model
-    #model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
     model = models.resnet50(weights=ResNet50_Weights.DEFAULT)
 
     # Modify the fully connected layer to match the number of classes
