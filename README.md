@@ -1,6 +1,6 @@
-# Image Gallery and Deep Learning for image editing and analysis
+# Classification of Meal Images into Major Food Categories and differentiating between Food and non-Food Items
 
-Welcome fellow coders, tech enthusiasts, designers or curious minds to our project. We are thrilled to have you here and excited to show you around in our image gallery editor that does basic editing functions and uses a CNN model for further analysis.
+Welcome fellow coders, tech enthusiasts, designers or curious minds to our project. We are thrilled to have you here and excited to show you around in our classification pipeline that includes evaluation with performance metrices, Out-of-Distribution (OOD) detection methods and more!
 
 ## Table of Contents
 - [Project Overview](#projectoverview)
@@ -10,47 +10,46 @@ Welcome fellow coders, tech enthusiasts, designers or curious minds to our proje
 - [License](#license)
 
 ## Project Overview
-
-This project combines a image gallery and editor with an Convolutional Neuronal Network (CNN) for classification. Image classification is about differentiating image types and  objects in images. Image classification in the medical context can support clinical decision making whether a patient is healthy or not.
-
-The aim of the project is to pre-process images and move them to the desired location. Once the dataset is in the right location the CNN shall be trained, validated, and evaluated. The performance of the model shall be evaluated and visualized by plotting various statistics and metrics.
+Dietary assessment is critical in managing health conditions such as type 2 diabetes and promoting overall well-being. Traditional methods like food diaries and nutritionist-led evaluations are often time-consuming, error-prone, and dependent on subjective input. To address these challenges, this project focuses on developing an automated and reliable food classification system using ResNet50, a state-of-the-art convolutional neural network (CNN). Trained on the Food-11 dataset, consisting of over 16,000 images spanning 11 food categories, the model demonstrates strong capabilities in accurately classifying food items while employing out-of-distribution (OOD) detection methods to reduce misclassification of non-food items.
 
 ### Main features:
 
-- **Image Gallery and Editor**:
-  - **Upload and Storage**: Multiple image formats including JPEG, PNG.
-  - **Organization**: Categorize images by date, event or subject.
-  - **Basic Editing**: Cropping, resizing and adjusting brightness/contrast in terminal
+- **1. Dataset and Preprocessing of Raw Data**:
+  - **Dataset**: Food-11 dataset with over 16,000 images across 11 major food categories. Data Manipulation using NumPy and Pandas.
+  - **Data Loading**: Framework to systematically load data in batches for training for both ID and OOD data.
+  - **Data Augmentation**: Random transformations (rotations, flips, color adjustments) enhance generalization and prevent overfitting of the model.
+ 
+- **2. Model Architecture**:
+  - **Model**: ResNet50 convolutional neural networks (CNN), optimization techniques to minimize training loss over several epochs. Model Implementation using PyTorch Library.
+    
+- **3. Out-of-Distribution (OOD) Detection**:
+  The following methods were used to allow and enhance the non-food detection in the dataset.
+  - **Maximum Softmax Probability (MSP)**: Thresholds probabilistic softmax scores
+  - **Maximum Logit (MaxLog)**: Analyses the maximum logit (model output) values
+  - **ODIN**: Detection works with the additional tuning parameters of temperature scaling and adding perturbations
 
-  - **Data Preparation**: Preprocess image data effectively for classification tasks.
-  - **Model Training**: Train models on the datasets to attain best accuracy.
-  - **Performance Evaluation**: Validate the trained model on unseen data and analyze segmentation.
-
-- **Visualization and Performance Metrics**:
-  - **Classification**: Visualize output of classification and accuracy.
-  - **Performance Metrics**: Learning curves
-  - **Metadata Analysis**: Visual output of metadata used.
-
-We will especially focus on the last point, as well as properly preparing the used data so we can also apply the methods learned during the lecture. 
-
+- **4. Evaluation**:
+  - **Metrics**: Accuracy, Precision and Recall
+  - **Visualization**: Confusion Matrix and plots using Matplotlib Library
+    
 ## Setup
 
 Please use the Anaconda Prompt instead of the terminal/powershell to avoid package installation problems. In the anaconda prompt, Navigate to a directory of your choice, e.g.,
 ```bash
-cd Documents/DataScience
+cd Documents/DM
 ```
 ### Step 1: Clone the Repository
 First, navigate to a directory of your choice, e.g.,
 ```bash
-cd Documents/DataScience
+cd Documents/DM
 ```
 Then, clone the repo to this directory:
 ```bash
-git clone https://github.com/PythonDataScience24/Image-Gallery-and-Deep-Learning-for-image-editing-and-analysis.git
+git clone https://github.com/DAck29/Food-Non-Food-Classification.git
 ```
 Navigate to the newly created directory:
 ```bash
-cd Image-Gallery-and-Deep-Learning-for-image-editing-and-analysis/Homework10
+cd Food-Non-Food-Classification
 ```
 ### Step 2: Open Anaconda Prompt
 To avoid any compatibility issues, we recommend to use the anaconda prompt that comes with your installation of Anaconda.
@@ -107,15 +106,16 @@ Image editings like size, name, and location.
 Visualization of various example images results from the trained CNN network.
 
 
-## Contributing 
+## Contributing and Future Work
 We highly welcome and encourage contributions to the project. Please refer to CONTRIBUTING.md for more details on how to submit pull requests or issues.
+
+Future work may involve to include regional or international food datasets to enhance broader coverage for the model. Adapting the project to work on mobile applications could allow for better usability and an even broader population. Further, incorporating volumetric estimation of food data to improve dietary assessment.
 
 ## License 
 The project is licensed under "MIT" license. See LICENSE.md file for more details.
 
 ## Contact
 For any questions, collaborations or support, you can contact us at: 
-- Kirchhofer Fabricio: fabricio.kirchhofer@students.unibe.ch
-- Nikolic Filip: filip.nikolic@students.unibe.ch
-- Osman Ibrahim: osman.ibrahim@students.unibe.ch
-- Palmgrove Noel Roy: noel.palmgrove@students.unibe.ch
+- Denise Nicole Ackermann: denise.ackermann@students.unibe.ch
+- Manuel Jonas Amrein: manuel.amrein@students.unibe.ch
+- Noel Roy Palmgrove: noel.palmgrove@students.unibe.ch
