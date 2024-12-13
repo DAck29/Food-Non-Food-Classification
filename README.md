@@ -95,11 +95,6 @@ python main.py
 ```bash
 python data_distribution.py
 ```
-### Step 3: Training: 20 epochs
-If UBELIX Slurm script is available:
-```bash
-sbatch slurm_jobscript.sh
-```
 Finally the OOD detection is conducted and results stored in Results/ dir.
 
 ## Contributing and Future Work
