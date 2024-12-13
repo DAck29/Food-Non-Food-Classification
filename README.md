@@ -57,7 +57,7 @@ conda env create -f environment.yml
 ```
 Alternatively, a manual environment can be created with Python 3.10:
 ```bash
-conda create --name your_env_name python=3.8
+conda create --name your_env_name python=3.10
 ```
 ### Step 4: Activate the conda environment
 ```bash
