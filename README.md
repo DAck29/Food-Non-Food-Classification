@@ -39,11 +39,7 @@ Please use the Anaconda Prompt instead of the terminal/powershell to avoid packa
 cd Documents/DM
 ```
 ### Step 1: Clone the Repository
-First, navigate to a directory of your choice, e.g.,
-```bash
-cd Documents/DM
-```
-Then, clone the repo to this directory:
+Clone the repo to this directory:
 ```bash
 git clone https://github.com/DAck29/Food-Non-Food-Classification.git
 ```
@@ -55,9 +51,13 @@ cd Food-Non-Food-Classification
 To avoid any compatibility issues, we recommend to use the anaconda prompt that comes with your installation of Anaconda.
 
 ### Step 3: Create a new conda environment
-Create a new conda environment with python 3.8. "myenv" is the name of your environment which you are free to adjust.
+Create a new conda environment using the provided environment.yml file provided in the repo to ensure that all required dependencies are installed without any hassle:
 ```bash
-conda create --name myenv python=3.8
+conda env create -f environment.yml
+```
+Alternatively, a manual environment can be created with Python 3.8:
+```bash
+conda create --name your_env_name python=3.8
 ```
 ### Step 4: Activate the conda environment
 ```bash
@@ -68,43 +68,39 @@ Install all required dependencies using pip:
 ```bash
 pip install -r requirements.txt
 ```
-Navigate: 
+Note: Using the environment.yml file in Step 3 installs all dependencies. The requirements.txt file should assist, should you opt to choose to install more packages later on.
+
+### Step 6: Verify the installation
 ```bash
-cd Homework10
+python --version
+pip list
 ```
-Note: We have included a conda command to install. It is commented out but if you wish to do so, you can use that command and not do it by pip. Here you are expected to be able to use conda installation. We recommend however to do so as instructed above using pip for easier installation and access.
 
 You are now ready to run the python files. Continue with "Usage" to learn how to use the files.
 
 ## Usage
 
 The basic functionality of this project is to:
-- Upload and manage images
-- Perform basic editing
-- Run models
-- Interpret outputs
+- Load and preprocess datasets (Food-11 and CIFAR-10 for OOD detection)
+- Train and evaluate a food classification model using ResNet50
+- Implement OOD detection methods: MSP, MaxLog and ODIN
+- Visualize results: Data distributions, confusion matrices, OOD performance metrics
 
-Important: The zip files (building_images.zip, x_ray_images.zip) are extracted by running our code and further creates folders (building_images, Forests, resized_Img, xray_dataset). These created folders can be deleted after running our app as these will be created next time you run the app. Do not delete anything else!
-
-**Start here:** While being in the anaconda prompt from before, type: 
+### Step 1: Run main.py
+This runs the pipeline for training and evaluation of ResNet50 with OOD detection. The outputs will be saved in the Results/ dir
 ```bash
 python main.py
 ```
-From here on you will instructed via user interface to navigate. Start with Image Gallery to create all necessary files for running CNN later.
-
-Img_Gallery_Examples.py - this will unpack the images and give a small demonstration of the ImgEditorGallery class. Ensure you are in the file directory when running the file. This file relies on Img_Gallery.py. After having run this, the dataset should be ready and you can move on to the next step.
-
-Run CNN.py - this file relies on CNN_utils.py. For memory reasons we set n_epochs to only 2. Feel free to adjust. If you want use UBELIX GPU there is a SLURM script ready to use.
-
-
-### Expected Output
-
-Datasets are prepared in dedicated folders.
-
-Image editings like size, name, and location.
-
-Visualization of various example images results from the trained CNN network.
-
+### Step 2: Visualization using data_distribution.py
+```bash
+python data_distribution.py
+```
+### Step 3: Training: 20 epochs
+If UBELIX Slurm script is available:
+```bash
+sbatch slurm_jobscript.sh
+```
+Finally the OOD detection is conducted and results stored in Results/ dir.
 
 ## Contributing and Future Work
 We highly welcome and encourage contributions to the project. Please refer to CONTRIBUTING.md for more details on how to submit pull requests or issues.
