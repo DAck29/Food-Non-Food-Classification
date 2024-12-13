@@ -1,3 +1,4 @@
+# Import Libraries
 import os
 import random
 import os
@@ -7,7 +8,7 @@ from torch.utils.data import DataLoader, Subset
 from typing import Tuple
 
 
-# relative path
+# Define dataset dirs using relative path
 parent_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 id_dataset_dir = os.path.join((parent_folder), "Dataset", "food_data")
 
