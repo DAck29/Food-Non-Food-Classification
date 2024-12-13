@@ -4,7 +4,6 @@ from sklearn.utils import compute_class_weight
 from sklearn.metrics import roc_curve, roc_auc_score
 from data_distribution import plot_data_distribution, plot_total_images
 
-
 from data_loader import get_dataloader, get_ood_loader
 from resnet_model import get_resnet50_model
 from tqdm import tqdm
@@ -120,7 +119,7 @@ def main():
 
     # Evaluate each method and store results
     for method in ["MSP", "MaxLog", "ODIN"]:
-        auroc, fpr_at_95_tpr = OOD.compute_auroc(model, eval_loader, ood_loader, device, results_dir, method=method)
+        auroc, fpr_at_95_tpr = OOD.compute_auroc_fpr95(model, eval_loader, ood_loader, device, results_dir, method=method)
         auroc_results[method] = auroc
         fpr_at_95_results[method] = fpr_at_95_tpr
         print(f"AUROC ({method}): {auroc:.4f}")
@@ -133,8 +132,8 @@ def main():
         roc_data_dict[method] = (fpr, tpr, auroc)
 
     # Plot the AUROC and FPR@95TPR as bar charts
-    OOD.plot_auroc_curves(roc_data_dict, results_dir)
-    OOD.plot_metrics_bar_chart(auroc_results, fpr_at_95_results, results_dir)
+    results.plot_auroc_curve(roc_data_dict, results_dir)
+    results.plot_metrics_bar_chart(auroc_results, fpr_at_95_results, results_dir)
 
 
 
