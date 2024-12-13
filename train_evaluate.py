@@ -1,4 +1,5 @@
-import torch
+#import torch
+#from openpyxl.styles.builtins import title
 from sklearn.metrics import roc_curve
 from tqdm import tqdm
 import OOD
@@ -99,7 +100,7 @@ def train_and_evaluate(model, train_loader, val_loader, eval_loader, ood_loader,
 
         # Evaluate each method and store results
         for method in ["MSP", "MaxLog", "ODIN"]:
-            auroc, fpr_at_95_tpr = OOD.compute_auroc_epoch(model, eval_loader, ood_loader, device, results_dir, method=method, epoch_nr=epoch)
+            auroc, fpr_at_95_tpr = OOD.compute_auroc_fpr95(model, eval_loader, ood_loader, device, results_dir, method=method, epoch_nr=epoch)
             auroc_results[method] = auroc
             fpr_at_95_results[method] = fpr_at_95_tpr
             print(f"AUROC ({method}): {auroc:.4f}")
@@ -112,8 +113,8 @@ def train_and_evaluate(model, train_loader, val_loader, eval_loader, ood_loader,
             roc_data_dict[method] = (fpr, tpr, auroc)
 
         # Plot the AUROC and FPR@95TPR as bar charts
-        OOD.plot_auroc_curves_epoch(roc_data_dict, results_dir, epoch_nr=epoch)
-        OOD.plot_metrics_bar_chart_epoch(auroc_results, fpr_at_95_results, results_dir, epoch_nr=epoch)
+        results.plot_auroc_curve(roc_data_dict, results_dir, epoch_nr=epoch)
+        results.plot_metrics_bar_chart(auroc_results, fpr_at_95_results, results_dir, epoch_nr=epoch)
 
         # Compute confusion matrix
         all_predictions = torch.cat(all_predictions)
@@ -129,12 +130,6 @@ def train_and_evaluate(model, train_loader, val_loader, eval_loader, ood_loader,
             class_names=train_loader.dataset.classes,
             results_dir=results_dir,
             epoch_nr=epoch
-        )
-        # Plot the cumulative confusion matrix
-        results.plot_all_confusion_matrices(
-            conf_matrix=cumulative_conf_matrix,
-            class_names=train_loader.dataset.classes,
-            results_dir=results_dir
         )
 
         # Save model to Results folder
@@ -155,7 +150,6 @@ def train_and_evaluate(model, train_loader, val_loader, eval_loader, ood_loader,
             f.write("\n")
     # Save training results
     results.save_training_results(train_losses, val_losses, num_epochs, accuracies, results_dir)
-    results.plot_all_confusion_matrices(cumulative_conf_matrix, train_loader.dataset.classes, results_dir)
 
     return accuracies
 
@@ -207,11 +201,12 @@ def evaluate_model(model, eval_loader, criterion, device, results_dir, epoch_nr,
                                                    num_classes=len(eval_loader.dataset.classes))
 
     # Plot and save confusion matrix
-    results.plot_evol_confusion_matrix(
+    results.plot_confusion_matrix(
         conf_matrix=conf_matrix,
         class_names=eval_loader.dataset.classes,
         results_dir=results_dir,
-        epoch_nr=epoch_nr
+        epoch_nr=epoch_nr,
+        title="Confusion Matrix in Evaluation"
     )
 
     print(f"Epoch [{epoch_nr + 1}/{num_epochs}], Evaluation Loss: {eval_loss:.4f}, Evaluation Accuracy: {accuracy:.2f}%")
