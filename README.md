@@ -36,7 +36,9 @@ Dietary assessment is critical in managing health conditions such as type 2 diab
 
 Please use the Anaconda Prompt instead of the terminal/powershell to avoid package installation problems. Alternatively, git bash can also be used. In the anaconda prompt, Navigate to a directory of your choice, e.g.,
 ```bash
-cd Documents/DM
+cd Documents
+mkdir DM # Creates a folder (alternatively, folder can be manually created)
+cd DM
 ```
 ### Step 1: Clone the Repository
 Clone the repo to this directory:
