@@ -34,7 +34,7 @@ Dietary assessment is critical in managing health conditions such as type 2 diab
     
 ## Setup
 
-Please use the Anaconda Prompt instead of the terminal/powershell to avoid package installation problems. In the anaconda prompt, Navigate to a directory of your choice, e.g.,
+Please use the Anaconda Prompt instead of the terminal/powershell to avoid package installation problems. Alternatively, git bash can also be used. In the anaconda prompt, Navigate to a directory of your choice, e.g.,
 ```bash
 cd Documents/DM
 ```
