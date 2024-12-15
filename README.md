@@ -61,6 +61,11 @@ Alternatively, a manual environment can be created with Python 3.10:
 ```bash
 conda create --name your_env_name python=3.10
 ```
+Should you encounter any environment issues -> use the manual environment setup.
+Should you encounter any packages issues -> after installing requirements.txt, additional install the missing packages using:
+```bash
+pip install "package name"
+```
 ### Step 4: Activate the conda environment
 ```bash
 conda activate myenv
