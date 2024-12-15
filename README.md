@@ -49,6 +49,8 @@ Navigate to the newly created directory:
 ```bash
 cd Food-Non-Food-Classification
 ```
+Next to this folder, extract the dataset.
+
 ### Step 2: Open Anaconda Prompt
 To avoid any compatibility issues, we recommend to use the anaconda prompt that comes with your installation of Anaconda.
 
@@ -93,16 +95,11 @@ The basic functionality of this project is to:
 - Implement OOD detection methods: MSP, MaxLog and ODIN
 - Visualize results: Data distributions, confusion matrices, OOD performance metrics
 
-### Step 1: Run main.py
+### Run main.py
 This runs the pipeline for training and evaluation of ResNet50 with OOD detection. The outputs will be saved in the Results/ dir
 ```bash
 python main.py
 ```
-### Step 2: Visualization using data_distribution.py
-```bash
-python data_distribution.py
-```
-Finally the OOD detection is conducted and results stored in Results/ dir.
 
 ## Contributing and Future Work
 We highly welcome and encourage contributions to the project. Please refer to CONTRIBUTING.md for more details on how to submit pull requests or issues.
