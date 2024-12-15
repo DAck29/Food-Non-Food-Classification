@@ -1,4 +1,5 @@
 bleach==6.2.0
+scikit-learn
 certifi==2024.8.30
 charset-normalizer==3.4.0
 cmake==3.31.1
