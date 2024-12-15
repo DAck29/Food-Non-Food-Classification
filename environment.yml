@@ -78,4 +78,4 @@ dependencies:
       - tqdm==4.67.1
       - triton==2.0.0
       - urllib3==2.2.3
-prefix: /storage/homefs/da17u029/.conda/envs/dm_test_env
+# prefix: /storage/homefs/da17u029/.conda/envs/dm_test_env
